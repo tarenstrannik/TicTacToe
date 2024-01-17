@@ -14,19 +14,21 @@ public class ClickTrigger : MonoBehaviour
 	[SerializeField]
 	private bool canClick;
 
+
 	private void Awake()
 	{
 		_ai = FindObjectOfType<TicTacToeAI>();
 	}
 
-	private void Start(){
+	private void Start()
+	{
 
 		_ai.onGameStarted.AddListener(AddReference);
-		_ai.onGameStarted.AddListener(() => SetInputEndabled(true));
-		_ai.onPlayerWin.AddListener((win) => SetInputEndabled(false));
+		_ai.onGameStarted.AddListener(() => SetInputEnabled(true));
+		_ai.onPlayerWin.AddListener((win) => SetInputEnabled(false));
 	}
 
-	private void SetInputEndabled(bool val){
+	private void SetInputEnabled(bool val){
 		canClick = val;
 	}
 
@@ -40,6 +42,7 @@ public class ClickTrigger : MonoBehaviour
 	{
 		if(canClick){
 			_ai.PlayerSelects(_myCoordX, _myCoordY);
-		}
+			canClick = false;
+        }
 	}
 }
