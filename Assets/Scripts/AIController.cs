@@ -20,6 +20,8 @@ public class AIController : IPlayerController
     private List<Cell> _freeCells;
     private List<Cell> _playerCells;
     private Cell[,] _cells;
+
+    private List<Cell> _cellsForRandom = new List<Cell>();
     public AIController(int aiLevel,int aiPlayerIndex)
     {
         this._aiLevel = aiLevel;
@@ -56,17 +58,19 @@ public class AIController : IPlayerController
     public Vector2Int GetNextMove()
     {
         Cell nextCell=null;
-
+        //preventing player from wining instantly
         if (!_hasFirstPat)
             nextCell = GetBestFreeCell();
         else
         {
             if(_aiLevel==0)
             {
+                //then on easy level simple random
                 nextCell = GetRandomFreeCell();
             }
             else
             {
+                //and on hard AI can make random or smart moves with configured probability
                 float randomVer = Random.Range(0f, 1f);
                 if(randomVer < _aiRandomLevel)
                 {
@@ -167,10 +171,12 @@ public class AIController : IPlayerController
 
             if (isNotRowBroken)
             {
+               
                 return emptyCellInRow;
             }
             else if (isNotColBroken)
             {
+                
                 return emptyCellInCol;
             }
             else
@@ -253,6 +259,7 @@ public class AIController : IPlayerController
             {
                 if (!_hasFirstPat)
                     _hasFirstPat = true;
+                
                 return emptyCellInRow;
             }
             else if (isNotColBroken)
@@ -307,44 +314,80 @@ public class AIController : IPlayerController
             {
                 for (var j = 0; j < 3; j=j+2)
                 {
-                    if (_cells[i, j]._playerIndex == null)
-                        return _cells[i, j];
+
+                    if (_cells[i, j]._playerIndex == null && !_cellsForRandom.Contains(_cells[i, j]))
+                        _cellsForRandom.Add(_cells[i, j]);
                 }
+            }
+            if (_cellsForRandom.Count > 0)
+            {
+                var rand = Random.Range(0, _cellsForRandom.Count);
+                var cell = _cellsForRandom[rand];
+                _cellsForRandom.Clear();
+                return cell;
             }
         }
         //another protection from possible player schemes
         if (_playerCells.Count==2)
         {
-            
-            int? fix=null;
-            if ((_playerCells[0]._xCoord ==2 && _playerCells[1]._yCoord==0) || (_playerCells[0]._xCoord == 0 && _playerCells[1]._yCoord == 2))
-            {
-                fix = _playerCells[0]._xCoord;
-            }
-            else if ((_playerCells[0]._yCoord == 2 && _playerCells[1]._xCoord == 0) || (_playerCells[0]._yCoord == 0 && _playerCells[1]._xCoord == 2))
-            {
-                fix = _playerCells[0]._yCoord;
-            }
-            if(fix!=null)
-            {
-                
-                int fixIndex = (int)fix;
-                for (var i=0;i<3;i++)
-                {
-                    if (_cells[fixIndex, i]._playerIndex == null)
-                    {
-                        
-                        return _cells[fixIndex, i];
-                    }
-                    else if (_cells[i, fixIndex]._playerIndex == null)
-                    {
-                        
-                        return _cells[i, fixIndex];
-                    }
 
+            int fixX;
+            int fixY;
+            if ((_playerCells[0]._xCoord %2 ==0) && (_playerCells[1]._yCoord % 2==0))
+            {
+                fixX = _playerCells[0]._xCoord;
+                fixY= _playerCells[1]._yCoord;
+                //if player took diagonal cells - don't take corners
+                if((_playerCells[1]._xCoord % 2 == 0) && (_playerCells[0]._yCoord % 2 == 0))
+                {
+                    if (_cells[fixX, 1]._playerIndex == null && !_cellsForRandom.Contains(_cells[fixX, 1]))
+                        _cellsForRandom.Add(_cells[fixX, 1]);
+                    else if (_cells[1, fixY]._playerIndex == null && !_cellsForRandom.Contains(_cells[1, fixY]))
+                        _cellsForRandom.Add(_cells[1, fixY]);
+                }
+                else
+                {
+                    for (var i = 0; i < 3; i++)
+                    {
+                        if (_cells[fixX, i]._playerIndex == null && !_cellsForRandom.Contains(_cells[fixX, i]))
+                            _cellsForRandom.Add(_cells[fixX, i]);
+                        else if (_cells[i, fixY]._playerIndex == null && !_cellsForRandom.Contains(_cells[i, fixY]))
+                            _cellsForRandom.Add(_cells[i, fixY]);
+
+                    }
+                }
+                
+            }
+            if ((_playerCells[1]._xCoord % 2 == 0) && (_playerCells[0]._yCoord % 2 == 0))
+            {
+                fixX = _playerCells[1]._xCoord;
+                fixY = _playerCells[0]._yCoord;
+                if ((_playerCells[0]._xCoord % 2 == 0) && (_playerCells[1]._yCoord % 2 == 0))
+                {
+                    if (_cells[fixX, 1]._playerIndex == null && !_cellsForRandom.Contains(_cells[fixX, 1]))
+                        _cellsForRandom.Add(_cells[fixX, 1]);
+                    else if (_cells[1, fixY]._playerIndex == null && !_cellsForRandom.Contains(_cells[1, fixY]))
+                        _cellsForRandom.Add(_cells[1, fixY]);
+                }
+                else
+                {
+                    for (var i = 0; i < 3; i++)
+                    {
+                        if (_cells[fixX, i]._playerIndex == null && !_cellsForRandom.Contains(_cells[fixX, i]))
+                            _cellsForRandom.Add(_cells[fixX, i]);
+                        else if (_cells[i, fixY]._playerIndex == null && !_cellsForRandom.Contains(_cells[i, fixY]))
+                            _cellsForRandom.Add(_cells[i, fixY]);
+                    }
                 }
             }
-            
+            if(_cellsForRandom.Count>0)
+            {
+                var rand = Random.Range(0, _cellsForRandom.Count);
+                var cell = _cellsForRandom[rand];
+                _cellsForRandom.Clear();
+                return cell;
+            }
+   
         }
 
 
