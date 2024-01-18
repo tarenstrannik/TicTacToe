@@ -68,7 +68,7 @@ public class AIController : IPlayerController
                 //then on easy level simple random
                 nextCell = GetRandomFreeCell();
             }
-            else
+            else if(_aiLevel == 1)
             {
                 //and on hard AI can make random or smart moves with configured probability
                 float randomVer = Random.Range(0f, 1f);
@@ -80,6 +80,10 @@ public class AIController : IPlayerController
                 {
                     nextCell = GetBestFreeCell();
                 }
+            }
+            else
+            {
+                nextCell = GetBestFreeCell();
             }
         }
 
